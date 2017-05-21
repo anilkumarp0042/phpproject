@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <service id="app.repository.adherent" class="AppBundle\Repository\AdherentRepository" public="false">
+            <argument>AppBundle\Entity\Adherent</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.committee" class="AppBundle\Repository\CommitteeRepository" public="false">
+            <argument>AppBundle\Entity\Committee</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.committee_membership" class="AppBundle\Repository\CommitteeMembershipRepository" public="false">
+            <argument>AppBundle\Entity\CommitteeMembership</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.event" class="AppBundle\Repository\EventRepository" public="false">
+            <argument>AppBundle\Entity\Event</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.event_registration" class="AppBundle\Repository\EventRegistrationRepository" public="false">
+            <argument>AppBundle\Entity\EventRegistration</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.mailjet_email" class="AppBundle\Repository\MailjetEmailRepository" public="false">
+            <argument>AppBundle\Entity\MailjetEmail</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.ton_macron_choice" class="AppBundle\Repository\TonMacronChoiceRepository" public="false">
+            <argument>AppBundle\Entity\TonMacronChoice</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.redirection" class="AppBundle\Repository\RedirectionRepository" public="false">
+            <argument>AppBundle\Entity\Redirection</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.procuration_request" class="AppBundle\Repository\ProcurationRequestRepository" public="false">
+            <argument>AppBundle\Entity\ProcurationRequest</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.procuration_proxy" class="AppBundle\Repository\ProcurationProxyRepository" public="false">
+            <argument>AppBundle\Entity\ProcurationProxy</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.facebook_profile" class="AppBundle\Repository\FacebookProfileRepository" public="false">
+            <argument>AppBundle\Entity\FacebookProfile</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+        <service id="app.repository.legislative_candidate" class="AppBundle\Repository\LegislativeCandidateRepository" public="false">
+            <argument>AppBundle\Entity\LegislativeCandidate</argument>
+            <factory service="doctrine" method="getRepository"/>
+        </service>
+
+    </services>
+</container>

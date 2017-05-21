@@ -1,0 +1,45 @@
+imports:
+    - { resource: config.yml }
+
+parameters:
+    env(PAYBOX_SITE): "1999888"
+    env(PAYBOX_RANK): "32"
+    env(PAYBOX_IDENTIFIER): "107904482"
+    env(PAYBOX_KEY): "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+    timeline_max_messages: 10
+
+services:
+    app.mailjet.transport.transactional:
+        class: 'AppBundle\Mailjet\Transport\MailjetNullTransport'
+        arguments: ['@?logger']
+        public: false
+
+    app.mailjet.transport.campaign:
+        class: 'AppBundle\Mailjet\Transport\MailjetNullTransport'
+        arguments: ['@?logger']
+        public: false
+
+    app.recaptcha.api_client:
+        class: 'AppBundle\Recaptcha\DummyRecaptchaApiClient'
+        public: false
+
+framework:
+    router:
+        resource: "%kernel.root_dir%/config/routing_dev.yml"
+        strict_requirements: true
+    profiler: { only_exceptions: false }
+
+web_profiler:
+    toolbar: true
+    intercept_redirects: false
+
+monolog:
+    handlers:
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug
+            channels: [!event]
+        console:
+            type:   console
+            channels: [!event, !doctrine]

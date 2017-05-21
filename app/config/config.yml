@@ -1,0 +1,227 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: adherent.yml }
+    - { resource: assets_version.yml }
+    - { resource: services/ }
+
+parameters:
+    locale:                      fr
+    pattern_uuid:                '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}'
+    pattern_sha1:                '[0-9A-Fa-f]{40}'
+    pattern_coordinate:          '-?\d+(\.\d{1,7})?'
+    timeline_max_messages:       30
+    search_max_results:          30
+    enable_canary:               "%env(ENABLE_CANARY)%"
+    procurations_reply_to_email: 'procurations@en-marche.fr'
+    transactional_sender_email:  'contact@en-marche.fr'
+    transactional_sender_name:   'En Marche !'
+    campaign_sender_email:       'jemarche@en-marche.fr'
+    campaign_sender_name:        'En Marche !'
+    feed_ttl:                    60 # in minutes
+    legislatives_financial_hotline_email: 'comptes.legislatives@en-marche.fr'
+    legislatives_standard_hotline_email: 'campagne.legislatives@en-marche.fr'
+
+framework:
+    translator:      { fallbacks: ["%locale%"] }
+    secret:          "%env(SECRET)%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    #serializer:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+    default_locale:  "%locale%"
+    trusted_hosts:   ~
+    trusted_proxies: ~
+    session:
+        name:        enmarche
+        handler_id:  snc_redis.session.handler
+    fragments:       ~
+    http_method_override: true
+    assets: ~
+    php_errors:
+        log: true
+    cache:
+        app: cache.adapter.doctrine
+        default_doctrine_provider: cache.redis_doctrine_provider
+
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+    globals:
+        assets_hash:            "%assets_hash%"
+        sentry_dsn:             "%env(SENTRY_PUBLIC_DSN)%"
+        enable_canary:          "%env(ENABLE_CANARY)%"
+        recaptcha_public_key:   "%env(RECAPTCHA_PUBLIC_KEY)%"
+        google_maps_api_key:    "%env(GMAPS_API_KEY)%"
+        algolia_app_id:         "%env(ALGOLIA_APP_ID)%"
+        algolia_api_key:        "%env(ALGOLIA_FRONT_API_KEY)%"
+        url_legacy:             "https://adherents.en-marche.fr"
+        legacy_adhesion:        "https://adherents.en-marche.fr/adherer.html"
+        legislatives_platform:  "%env(LEGISLATIVES_PLATFORM)%"
+        algolia_blacklist:      "%env(ALGOLIA_BLACKLIST)%"
+        enable_hp_video:        "%env(ENABLE_HP_VIDEO)%"
+    form_themes:
+        - 'form_theme.html.twig'
+        - 'SonataCoreBundle:Form:datepicker.html.twig'
+        - 'SonataCoreBundle:Form:colorpicker.html.twig'
+
+doctrine:
+    dbal:
+        driver:           pdo_mysql
+        charset:          UTF8
+        host:             "%env(DATABASE_HOST)%"
+        port:             "%env(DATABASE_PORT)%"
+        dbname:           "%env(DATABASE_NAME)%"
+        user:             "%env(DATABASE_USER)%"
+        password:         "%env(DATABASE_PASSWORD)%"
+        unix_socket:      "%env(DATABASE_SOCKET)%"
+        server_version:   5.7
+
+        types:
+            uuid:           Ramsey\Uuid\Doctrine\UuidType
+            phone_number:   Misd\PhoneNumberBundle\Doctrine\DBAL\Types\PhoneNumberType
+            geo_point:      AppBundle\Doctrine\DBAL\Types\GeoPointType
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+
+        filters:
+            softdeleteable:
+                class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+                enabled: true
+
+        dql:
+            numeric_functions:
+                acos: DoctrineExtensions\Query\Mysql\Acos
+                cos: DoctrineExtensions\Query\Mysql\Cos
+                radians: DoctrineExtensions\Query\Mysql\Radians
+                sin: DoctrineExtensions\Query\Mysql\Sin
+
+doctrine_migrations:
+    dir_name: "%kernel.root_dir%/migrations"
+    namespace: Migrations
+    table_name: migrations
+    name: En Marche migrations
+
+stof_doctrine_extensions:
+    default_locale: fr_FR
+    orm:
+        default:
+            sluggable: true
+            softdeleteable: true
+            timestampable: true
+
+lexik_paybox:
+    parameters:
+        production:  false
+        site:        "%env(PAYBOX_SITE)%"
+        rank:        "%env(PAYBOX_RANK)%"
+        login:       "%env(PAYBOX_IDENTIFIER)%"
+        hmac:
+            key:     "%env(PAYBOX_KEY)%"
+
+csa_guzzle:
+    profiler: '%kernel.debug%'
+    logger: true
+    clients:
+        mailjet_api:
+            config:
+                base_uri: 'https://api.mailjet.com/v3/'
+                timeout: 2.0
+                headers:
+                    Content-Type: 'application/json'
+
+        google_charts_api:
+            config:
+                base_uri: 'https://chart.googleapis.com'
+                timeout: 2.0
+
+        google_maps_static_api:
+            config:
+                base_uri: 'https://maps.googleapis.com'
+                timeout: 2.0
+
+        facebook_graph_api:
+            config:
+                base_uri: 'https://graph.facebook.com'
+                timeout: 2.0
+
+scheb_two_factor:
+    google:
+        enabled: true
+        issuer: En Marche !
+        template: security/admin_google_authenticator.html.twig
+
+sonata_block:
+    default_contexts: [cms]
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts: [admin]
+
+sonata_admin:
+    title_logo: logo/small_bg_white.jpg
+    templates:
+        layout:  admin/layout.html.twig
+    security:
+        handler: sonata.admin.security.handler.role
+
+bazinga_geocoder:
+    providers:
+        cache:
+            adapter:  app.geocoder.cache_adapter
+            provider: google_maps
+        google_maps:
+            locale:  '%locale%'
+            use_ssl: true
+            api_key: '%env(GMAPS_API_KEY)%'
+
+snc_redis:
+    clients:
+        default:
+            type: predis
+            alias: default
+            dsn: "redis://%env(REDIS_HOST)%"
+    session:
+        client: default
+
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host: "%env(RABBITMQ_HOST)%"
+            vhost: '/'
+            lazy: false
+            connection_timeout: 86400
+            read_write_timeout: 86400
+            heartbeat: 0
+
+    producers:
+        mailjet_referent:
+            connection:       default
+            exchange_options: { name: 'mailjet-referent', type: direct }
+            class:            AppBundle\Producer\Mailjet\ReferentMessageMailjetProducer
+
+        referent_managed_users_dumper:
+            connection:       default
+            exchange_options: { name: 'referent-managed-users-dumper', type: direct }
+            class:            AppBundle\Producer\ReferentManagedUsersDumperProducer
+
+    consumers:
+        mailjet_referent:
+            connection:        default
+            exchange_options:  { name: 'mailjet-referent', type: direct }
+            queue_options:     { name: 'mailjet-referent', durable: false }
+            callback:          app.consumer.mailjet.referent
+            qos_options:       { prefetch_size: 0, prefetch_count: 1, global: false }
+
+        referent_managed_users_dumper:
+            connection:        default
+            exchange_options:  { name: 'referent-managed-users-dumper', type: direct }
+            queue_options:     { name: 'referent-managed-users-dumper', durable: false }
+            callback:          app.consumer.referent_managed_users_dumper
+            qos_options:       { prefetch_size: 0, prefetch_count: 1, global: false }

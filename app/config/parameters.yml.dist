@@ -1,0 +1,62 @@
+parameters:
+    env(DATABASE_HOST):         db
+    env(DATABASE_PORT):         3306
+    env(DATABASE_SOCKET):       ~
+    env(DATABASE_NAME):         enmarche
+    env(DATABASE_USER):         root
+    env(DATABASE_PASSWORD):     root
+
+    env(REDIS_HOST):            redis
+
+    env(RABBITMQ_HOST):         rabbitmq
+    env(RABBITMQ_PORT):         ~
+    env(RABBITMQ_USER):         ~
+    env(RABBITMQ_PASSWORD):     ~
+
+    env(SENTRY_DSN):            ~
+    env(SENTRY_PUBLIC_DSN):     ~
+
+    env(SECRET):                ab2f3477e2b72055492b75f12490b172
+
+    env(ENABLE_CANARY):         1
+
+    env(GCLOUD_PROJECT_ID):     ~
+    env(GCLOUD_BUCKET):         ~
+    env(GCLOUD_LB_IP):          ~
+
+    env(PAYBOX_SITE):           ~
+    env(PAYBOX_RANK):           ~
+    env(PAYBOX_IDENTIFIER):     ~
+    env(PAYBOX_KEY):            ~
+
+    env(RECAPTCHA_PUBLIC_KEY):  ''
+    env(RECAPTCHA_PRIVATE_KEY): ''
+
+    env(MAILJET_TRANSACTIONAL_PUBLIC_KEY):     ''
+    env(MAILJET_TRANSACTIONAL_PRIVATE_KEY):    ''
+    env(MAILJET_CAMPAIGN_PUBLIC_KEY):          ''
+    env(MAILJET_CAMPAIGN_PRIVATE_KEY):         ''
+
+    env(GMAPS_API_KEY):         ''
+
+    env(FACEBOOK_APP_ID):         'app_id'
+    env(FACEBOOK_APP_SECRET):     'app_secret'
+
+    env(WATERMARKS_PATH):         '%kernel.root_dir%/../web/watermarks'
+
+    env(ALGOLIA_APP_ID):        ~
+    env(ALGOLIA_FRONT_API_KEY): ~
+    env(ALGOLIA_BACK_API_KEY):  ~
+    env(ALGOLIA_BLACKLIST):     ~
+
+    env(LEGISLATIVES_PLATFORM): https://www.google.fr
+
+    enmarche_domain:            '%env(ENMARCHE_DOMAIN)%'
+    legislatives_domain:        '%env(LEGISLATIVES_DOMAIN)%'
+    env(ENMARCHE_DOMAIN):       en-marche.fr
+    env(LEGISLATIVES_DOMAIN):   legislatives-en-marche.fr
+
+    env(DISABLE_AMERICA):       0
+    env(DISABLE_EUROPE):        0
+
+    env(ENABLE_HP_VIDEO):       0

@@ -1,0 +1,37 @@
+version: "2"
+
+services:
+    app:
+        volumes:
+            - "~/.composer:/root/.composer"
+        ports:
+            - "8000:80"
+#        environment:
+#            - BLACKFIRE_CLIENT_ID
+#            - BLACKFIRE_CLIENT_TOKEN
+
+    rabbitmq:
+        ports:
+            - "15672:15672"
+
+    db:
+        ports:
+            - "3306:3306"
+
+    pma:
+        image: phpmyadmin/phpmyadmin
+        depends_on:
+            - db
+        environment:
+            PMA_HOST: db
+            PMA_USER: root
+            PMA_PASSWORD: root
+        ports:
+            - "8080:80"
+
+#    blackfire:
+#        image: blackfire/blackfire
+#        environment:
+#            BLACKFIRE_LOG_LEVEL: 4
+#            BLACKFIRE_SERVER_ID:
+#            BLACKFIRE_SERVER_TOKEN:

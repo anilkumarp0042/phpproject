@@ -1,0 +1,68 @@
+imports:
+    - { resource: config_dev.yml }
+
+services:
+    app.recaptcha.api_client:
+        class: 'AppBundle\Recaptcha\DummyRecaptchaApiClient'
+        public: false
+
+    app.geocoder:
+        class: 'AppBundle\Geocoder\DummyGeocoder'
+        public: false
+
+    app.map.google_maps_static_provider:
+        class: 'AppBundle\Map\DummyStaticMapProvider'
+
+    app.glide.cache_adapter:
+        class: 'League\Flysystem\Memory\MemoryAdapter'
+
+    app.referent.message_handler.producer:
+        class: 'AppBundle\Producer\Mailjet\ReferentMessageNullProducer'
+        public: false
+
+parameters:
+    enmarche_domain: localhost
+    legislatives_domain: 'legislatives-en-marche.dev'
+    adherent_interests:
+        agriculture: Agriculture
+        culture: Culture
+        economie: Économie
+        education: Éducation
+        egalite: Egalité F / H
+        emploi: Emploi
+        environement: Environement
+        europe: Europe
+        international: International
+        institution: Institution
+        jeunesse: Jeunesse
+        justice: Justice
+        logement: Logement
+        numerique: Numérique
+        sante: Santé
+        securite: Sécurité
+        territoire: Territoire
+
+framework:
+    test: ~
+    session:
+        storage_id: session.storage.mock_file
+        name: 'en_marche_session_%kernel.environment%'
+    profiler:
+        collect: false
+    cache:
+        app: cache.adapter.null
+
+web_profiler:
+    toolbar: false
+    intercept_redirects: false
+
+security:
+    encoders:
+        AppBundle\Entity\Administrator:
+            algorithm: md5
+            encode_as_base64: false
+            iterations: 0
+        AppBundle\Entity\Adherent:
+            algorithm: md5
+            encode_as_base64: false
+            iterations: 0

@@ -1,0 +1,67 @@
+machine:
+    node:
+        version: 4.5.0
+    php:
+        version: 7.1.0
+    environment:
+        YARN_VERSION: 0.18.1
+        PATH: "${PATH}:${HOME}/.yarn/bin:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+        DATABASE_HOST: 127.0.0.1
+        DATABASE_USER: ubuntu
+        DATABASE_PASSWORD: ''
+        DATABASE_NAME: circle_test
+    services:
+        - docker
+
+dependencies:
+    cache_directories:
+        - ~/.yarn
+        - ~/.cache/yarn
+        - ~/.composer/cache/files
+    pre:
+        - |
+            if [[ ! -e ~/.yarn/bin/yarn || $(yarn --version) != "${YARN_VERSION}" ]]; then
+              curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+            fi
+        - echo "memory_limit = 512M" > /opt/circleci/php/$(phpenv global)/etc/conf.d/memory.ini
+    override:
+        - yarn install
+        - composer install --no-interaction
+
+test:
+    override:
+        - case $CIRCLE_NODE_INDEX in 0) mkdir -p $CIRCLE_TEST_REPORTS/phpunit && ./vendor/bin/phpunit --exclude-group functionnal --log-junit $CIRCLE_TEST_REPORTS/phpunit/junit.xml && yarn lint && yarn test && yarn run build-prod ;; 1) mkdir -p $CIRCLE_TEST_REPORTS/phpunit && ./vendor/bin/phpunit --group functionnal --log-junit $CIRCLE_TEST_REPORTS/phpunit/junit.xml ;; esac:
+              parallel: true
+
+deployment:
+    staging:
+        branch: master
+        owner: EnMarche
+        commands:
+            # Check packages security
+            #- bin/console security:check
+
+            # Google Cloud authentication
+            - echo $GCLOUD_SERVICE_KEY | base64 --decode > ${HOME}/gcloud-service-key.json && cp ${HOME}/gcloud-service-key.json gcloud-service-key.json
+            - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update
+            - sudo /opt/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            - sudo /opt/google-cloud-sdk/bin/gcloud config set project $GCLOUD_PROJECT
+
+            # Build the image
+            - yarn run build-prod
+            - docker build -t enmarche-common -f prod.common.dockerfile .
+            - docker build -t eu.gcr.io/$GCLOUD_PROJECT/app:$CIRCLE_SHA1 -f prod.app.dockerfile .
+            - docker build -t eu.gcr.io/$GCLOUD_PROJECT/worker-mailjet:$CIRCLE_SHA1 -f prod.worker-mailjet.dockerfile .
+            - docker build -t eu.gcr.io/$GCLOUD_PROJECT/worker-referents-users-dumper:$CIRCLE_SHA1 -f prod.worker-referents-users-dumper.dockerfile .
+            - docker build -t eu.gcr.io/$GCLOUD_PROJECT/cron:$CIRCLE_SHA1 -f prod.cron.dockerfile .
+
+            # Push the images to Google Cloud
+            - sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/$GCLOUD_PROJECT/app:$CIRCLE_SHA1
+            - sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/$GCLOUD_PROJECT/worker-mailjet:$CIRCLE_SHA1
+            - sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/$GCLOUD_PROJECT/worker-referents-users-dumper:$CIRCLE_SHA1
+            - sudo /opt/google-cloud-sdk/bin/gcloud docker -- push eu.gcr.io/$GCLOUD_PROJECT/cron:$CIRCLE_SHA1
+
+            # Deploy to staging
+            - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update kubectl
+            - sudo /opt/google-cloud-sdk/bin/gcloud container clusters get-credentials $GCLOUD_CLUSTER --project $GCLOUD_PROJECT --zone europe-west1-d
+            - sudo GOOGLE_APPLICATION_CREDENTIALS=${HOME}/gcloud-service-key.json /opt/google-cloud-sdk/bin/kubectl set image deployment/staging-app enmarche=eu.gcr.io/$GCLOUD_PROJECT/app:$CIRCLE_SHA1

@@ -1,0 +1,36 @@
+lexik_paybox:
+    resource: "@LexikPayboxBundle/Resources/config/routing.yml"
+    prefix:   "/don"
+
+admin_dashboard:
+    resource: "@SonataAdminBundle/Resources/config/routing/sonata_admin.xml"
+    prefix:   "/admin"
+
+admin_crud:
+    resource: .
+    type:     sonata_admin
+    prefix:   "/admin"
+
+app:
+    resource: "@AppBundle/Controller/"
+    type:     "annotation"
+    host:     "%enmarche_domain%"
+
+app_admin:
+    resource: "@AppBundle/Controller/Admin"
+    type:     "annotation"
+    prefix:   "/admin"
+    host:     "%enmarche_domain%"
+
+app_legislatives:
+    resource: "@AppBundle/Controller/Legislatives"
+    type:     "annotation"
+    host:     "%legislatives_domain%"
+
+app_health:
+    resource: "@AppBundle/Controller/HealthController.php"
+    type:     "annotation"
+
+app_assets:
+    resource: "@AppBundle/Controller/AssetsController.php"
+    type:     "annotation"
